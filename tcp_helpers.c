@@ -35,6 +35,22 @@ int tcp_send_public_key(int sockfd, uint8_t *p_key){
     return tcp_client_connection_send(sockfd, (uint8_t*)buf, sizeof(struct TCP_COMMAND) + TCP_COMMAND_ARGLEN(*cmd));
 }
 
+int tcp_send_encaps_shared_cipher(int sockfd, uint8_t *ciphertext, uint8_t *shared_secret_e){
+    uint8_t buf[20000] = INIT_TCP_COMMAND(SEND_ENCAPS_CIPHER,sizeof(encapsCipher));
+    struct TCP_COMMAND *cmd = (struct TCP_COMMAND *) buf;
+    encapsCipher *args = (encapsCipher*) &buf[ sizeof(struct TCP_COMMAND) ];
+    memcpy(args->ciphertext,ciphertext,OQS_KEM_kyber_768_length_ciphertext);
+    memcpy(args->shared_secret_e,shared_secret_e,OQS_KEM_kyber_768_length_ciphertext);
+
+    int i;
+    printf("Sending:\n");
+    for(i=0 ; i < OQS_KEM_kyber_768_length_public_key; i++){
+            printf("%d ", args->pub_key[i]);
+    }
+    return tcp_client_connection_send(sockfd, (uint8_t*)buf, sizeof(struct TCP_COMMAND) + TCP_COMMAND_ARGLEN(*cmd));
+}
+
+
 void tcp_server_command_parser(struct TCP_COMMAND recvcmd, int sockfd){
     uint16_t n;
 	uint16_t offset = 0;
@@ -56,7 +72,9 @@ void tcp_server_command_parser(struct TCP_COMMAND recvcmd, int sockfd){
             pubKey *args = (pubKey *) buf;
             printf("Public Key:\n");
             
-            ENCAPS();
+            ENCAPS(args->pub_key);
+
+
         }
     }
 }

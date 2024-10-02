@@ -36,6 +36,7 @@ OQS_STATUS ENCAPS(uint8_t *public_key){
     OQS_STATUS rc = OQS_KEM_kyber_768_encaps(ciphertext, shared_secret_e, public_key);
     if (rc != OQS_SUCCESS) {
     printf("ERROR: OQS_KEM_kyber_768_keypair failed!\n");
-    return OQS_ERROR;
+        return OQS_ERROR;
     }
+    return OQS_SUCCESS;
 }
